@@ -99,4 +99,4 @@ const shared = {
   target: 'web',
 };
 
-module.exports = [client, server, shared]; 
+module.exports = [client, server, shared];

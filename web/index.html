@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Underground Fight Club</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div class="container" id="main-menu" v-if="currentScreen === 'main'">
+            <div class="header">
+                <h1>UNDERGROUND FIGHT CLUB</h1>
+                <div class="subtitle">The first rule of fight club is: you do not talk about fight club.</div>
+            </div>
+            <div class="menu">
+                <div class="menu-item" @click="setScreen('register')">Register as Fighter</div>
+                <div class="menu-item" @click="setScreen('matchmaking')">Join Matchmaking</div>
+                <div class="menu-item" @click="setScreen('betting')">Betting</div>
+                <div class="menu-item" @click="setScreen('leaderboard')">Leaderboard</div>
+                <div class="menu-item" @click="closeUI()">Close</div>
+            </div>
+        </div>
+
+        <!-- Registration Screen -->
+        <div class="container" id="register-screen" v-if="currentScreen === 'register'">
+            <div class="header">
+                <h1>FIGHTER REGISTRATION</h1>
+            </div>
+            <div class="form">
+                <div class="form-group">
+                    <label for="fighter-name">Fighter Name:</label>
+                    <input type="text" id="fighter-name" v-model="registration.name">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" @click="registerFighter()">Register</button>
+                    <button class="btn btn-secondary" @click="setScreen('main')">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matchmaking Screen -->
+        <div class="container" id="matchmaking-screen" v-if="currentScreen === 'matchmaking'">
+            <div class="header">
+                <h1>MATCHMAKING</h1>
+            </div>
+            <div class="matchmaking">
+                <div class="match-types">
+                    <div class="match-type" v-for="(type, index) in matchTypes" :key="index" @click="selectMatchType(index)">
+                        <h3>{{ type.name }}</h3>
+                        <p>{{ type.description }}</p>
+                        <div class="match-info">
+                            <span>Entry Fee: ${{ type.entryFee }}</span>
+                            <span>Win Reward: ${{ type.rewards.winner.money }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" :disabled="selectedMatchType === null" @click="joinMatchmaking()">Join Queue</button>
+                    <button class="btn btn-secondary" @click="setScreen('main')">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Betting Screen -->
+        <div class="container" id="betting-screen" v-if="currentScreen === 'betting'">
+            <div class="header">
+                <h1>PLACE BETS</h1>
+            </div>
+            <div class="betting">
+                <div class="active-fights" v-if="activeFights.length > 0">
+                    <div class="fight" v-for="(fight, index) in activeFights" :key="index" @click="selectFight(index)">
+                        <h3>{{ fight.arena.name }}</h3>
+                        <div class="fighters">
+                            <div class="fighter">{{ fight.fighterData[0].name }}</div>
+                            <div class="vs">VS</div>
+                            <div class="fighter">{{ fight.fighterData[1].name }}</div>
+                        </div>
+                        <div class="fight-info">
+                            <span>Total Bets: ${{ fight.totalBets }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="no-fights" v-else>
+                    <p>No active fights to bet on.</p>
+                </div>
+                <div class="bet-form" v-if="selectedFight !== null">
+                    <h3>Place Your Bet</h3>
+                    <div class="form-group">
+                        <label for="bet-amount">Bet Amount:</label>
+                        <input type="number" id="bet-amount" v-model="betAmount" min="100" max="10000">
+                    </div>
+                    <div class="form-group">
+                        <label>Select Fighter:</label>
+                        <div class="fighter-select">
+                            <div class="fighter" @click="selectedFighter = 0" :class="{ selected: selectedFighter === 0 }">
+                                {{ activeFights[selectedFight].fighterData[0].name }}
+                            </div>
+                            <div class="fighter" @click="selectedFighter = 1" :class="{ selected: selectedFighter === 1 }">
+                                {{ activeFights[selectedFight].fighterData[1].name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" @click="placeBet()">Place Bet</button>
+                        <button class="btn btn-secondary" @click="cancelBetSelection()">Cancel</button>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" @click="setScreen('main')">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div class="container" id="leaderboard-screen" v-if="currentScreen === 'leaderboard'">
+            <div class="header">
+                <h1>LEADERBOARD</h1>
+            </div>
+            <div class="leaderboard">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Fighter</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>KOs</th>
+                            <th>Rating</th>
+                            <th>Earnings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(fighter, index) in leaderboard" :key="index">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ fighter.name }}</td>
+                            <td>{{ fighter.wins }}</td>
+                            <td>{{ fighter.losses }}</td>
+                            <td>{{ fighter.knockouts }}</td>
+                            <td>{{ fighter.rating }}</td>
+                            <td>${{ fighter.earnings }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-group">
+                    <button class="btn btn-secondary" @click="setScreen('main')">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 

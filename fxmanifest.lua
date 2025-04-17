@@ -3,7 +3,7 @@ game 'gta5'
 
 name 'underground-fight-club'
 description 'A standalone underground fighting club script with framework integration'
-author 'Claude AI'
+author 'Vein'
 version '1.0.0'
 
 lua54 'yes'
@@ -31,4 +31,4 @@ files {
 
 dependencies {
     'ox_lib'
-} 
+}
